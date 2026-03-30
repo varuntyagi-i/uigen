@@ -96,7 +96,7 @@ export function PreviewFrame() {
     };
 
     updatePreview();
-  }, [refreshTrigger, getAllFiles, entryPoint, error, isFirstLoad]);
+  }, [refreshTrigger, getAllFiles, entryPoint, isFirstLoad]);
 
   if (error) {
     if (error === "firstLoad") {

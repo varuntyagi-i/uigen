@@ -21,11 +21,19 @@ export async function getProject(projectId: string) {
     throw new Error("Project not found");
   }
 
+  let messages, data;
+  try {
+    messages = JSON.parse(project.messages);
+    data = JSON.parse(project.data);
+  } catch (error) {
+    throw new Error(`Failed to parse project data: ${error}`);
+  }
+
   return {
     id: project.id,
     name: project.name,
-    messages: JSON.parse(project.messages),
-    data: JSON.parse(project.data),
+    messages,
+    data,
     createdAt: project.createdAt,
     updatedAt: project.updatedAt,
   };

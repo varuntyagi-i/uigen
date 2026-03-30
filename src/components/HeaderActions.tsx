@@ -84,12 +84,16 @@ export function HeaderActions({ user, projectId }: HeaderActionsProps) {
   };
 
   const handleNewDesign = async () => {
-    const project = await createProject({
-      name: `Design #${~~(Math.random() * 100000)}`,
-      messages: [],
-      data: {},
-    });
-    router.push(`/${project.id}`);
+    try {
+      const project = await createProject({
+        name: `Design #${~~(Math.random() * 100000)}`,
+        messages: [],
+        data: {},
+      });
+      router.push(`/${project.id}`);
+    } catch (error) {
+      console.error("Failed to create new design:", error);
+    }
   };
 
   if (!user) {

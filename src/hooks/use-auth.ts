@@ -12,38 +12,42 @@ export function useAuth() {
   const [isLoading, setIsLoading] = useState(false);
 
   const handlePostSignIn = async () => {
-    // Get any anonymous work
-    const anonWork = getAnonWorkData();
+    try {
+      // Get any anonymous work
+      const anonWork = getAnonWorkData();
 
-    if (anonWork && anonWork.messages.length > 0) {
-      // Create a project with the anonymous work
-      const project = await createProject({
-        name: `Design from ${new Date().toLocaleTimeString()}`,
-        messages: anonWork.messages,
-        data: anonWork.fileSystemData,
+      if (anonWork && anonWork.messages.length > 0) {
+        // Create a project with the anonymous work
+        const project = await createProject({
+          name: `Design from ${new Date().toLocaleTimeString()}`,
+          messages: anonWork.messages,
+          data: anonWork.fileSystemData,
+        });
+
+        clearAnonWork();
+        router.push(`/${project.id}`);
+        return;
+      }
+
+      // Otherwise, find the user's most recent project
+      const projects = await getProjects();
+
+      if (projects.length > 0) {
+        router.push(`/${projects[0].id}`);
+        return;
+      }
+
+      // If no projects exist, create a new one
+      const newProject = await createProject({
+        name: `New Design #${~~(Math.random() * 100000)}`,
+        messages: [],
+        data: {},
       });
 
-      clearAnonWork();
-      router.push(`/${project.id}`);
-      return;
+      router.push(`/${newProject.id}`);
+    } catch (error) {
+      console.error("Failed to complete post sign-in setup:", error);
     }
-
-    // Otherwise, find the user's most recent project
-    const projects = await getProjects();
-
-    if (projects.length > 0) {
-      router.push(`/${projects[0].id}`);
-      return;
-    }
-
-    // If no projects exist, create a new one
-    const newProject = await createProject({
-      name: `New Design #${~~(Math.random() * 100000)}`,
-      messages: [],
-      data: {},
-    });
-
-    router.push(`/${newProject.id}`);
   };
 
   const signIn = async (email: string, password: string) => {
