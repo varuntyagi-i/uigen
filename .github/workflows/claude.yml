@@ -16,14 +16,14 @@ jobs:
       (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
       (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
       (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
-      (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
+      (github.event_name == 'issues' && (github.event.action == 'opened' || github.event.action == 'assigned'))
     runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
       issues: write
       id-token: write
-      actions: read # Required for Claude to read CI results on PRs
+      actions: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -34,7 +34,7 @@ jobs:
         run: |
           npm run setup:ci
           npm run dev:daemon
-          
+
       - name: Run Claude Code
         id: claude
         uses: anthropics/claude-code-action@v1
@@ -43,10 +43,20 @@ jobs:
 
           custom_instructions: |
             The project is already set up with all dependencies installed.
-            The server is already running at localhost:3000. Logs from it 
-            are being written to logs.txt. If needed, you can query the
-            db with the 'sqlite3' cli. If needed, use the mcp__playwright
-            set of tools to launch a browser and interact with the app.
+            The dev server is running at localhost:3000 and writing logs to logs.txt.
+
+            Your job is to implement the changes described in the issue, then test them.
+
+            Workflow:
+            1. Read the issue and understand what needs to change
+            2. Make the necessary code changes
+            3. Run `npm test` to verify tests pass
+            4. Use the mcp__playwright tools to open localhost:3000 and visually verify the change works
+            5. Create a pull request with your changes
+
+            Other notes:
+            - Query the DB with the `sqlite3` CLI if needed
+            - Check logs.txt if the server behaves unexpectedly
 
           mcp_config: |
             {
@@ -61,5 +71,5 @@ jobs:
                 }
               }
             }
-            
-          allowed_tools: "Bash(npm:*),Bash(sqlite3:*),mcp__playwright__browser_snapshot,mcp__playwright__browser_click,..."
+
+          allowed_tools: "Bash(npm:*),Bash(sqlite3:*),Bash(git:*),mcp__playwright__browser_snapshot,mcp__playwright__browser_click,mcp__playwright__browser_navigate,mcp__playwright__browser_type,mcp__playwright__browser_wait_for"
