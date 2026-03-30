@@ -151,10 +151,12 @@ export function PreviewFrame() {
   }
 
   return (
-    <iframe
-      ref={iframeRef}
-      className="w-full h-full border-0 bg-white"
-      title="Preview"
-    />
+    <div className="w-full h-full" onMouseLeave={() => window.focus()}>
+      <iframe
+        ref={iframeRef}
+        className="w-full h-full border-0 bg-white"
+        title="Preview"
+      />
+    </div>
   );
 }
